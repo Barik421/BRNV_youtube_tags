@@ -4,6 +4,20 @@ let updateTimer = 0;
 
 document.addEventListener("yt-navigate-finish", scheduleUpdate);
 window.addEventListener("popstate", scheduleUpdate);
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!message || message.type !== "GET_PAGE_TAGS") {
+    return false;
+  }
+
+  const videoId = getWatchVideoId();
+  if (message.videoId && message.videoId !== videoId) {
+    sendResponse({ ok: false, tags: [] });
+    return false;
+  }
+
+  sendResponse({ ok: true, videoId, tags: getHtmlTags() });
+  return false;
+});
 scheduleUpdate();
 
 function scheduleUpdate() {
@@ -32,7 +46,8 @@ async function updateForCurrentPage() {
     return;
   }
 
-  const tags = await requestTags(videoId);
+  const htmlTags = await waitForHtmlTags();
+  const tags = htmlTags.length ? htmlTags : await requestTags(videoId);
   if (currentVideoId !== videoId) {
     return;
   }
@@ -77,6 +92,41 @@ function delay(ms) {
   return new Promise((resolve) => {
     window.setTimeout(resolve, ms);
   });
+}
+
+async function waitForHtmlTags() {
+  for (let index = 0; index < 10; index += 1) {
+    const tags = getHtmlTags();
+    if (tags.length) {
+      return tags;
+    }
+    await delay(150);
+  }
+  return [];
+}
+
+function getHtmlTags() {
+  const meta = document.querySelector('meta[name="keywords"]');
+  const content = meta && typeof meta.content === "string" ? meta.content : "";
+  return parseTags(content);
+}
+
+function parseTags(value) {
+  if (!value) {
+    return [];
+  }
+
+  const seen = new Set();
+  return value
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter((tag) => {
+      if (!tag || seen.has(tag.toLowerCase())) {
+        return false;
+      }
+      seen.add(tag.toLowerCase());
+      return true;
+    });
 }
 
 function requestTags(videoId) {

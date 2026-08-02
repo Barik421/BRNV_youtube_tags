@@ -5,28 +5,30 @@ const tagCount = document.getElementById("tag-count");
 const statusMessage = document.getElementById("status-message");
 const tagsList = document.getElementById("tags-list");
 let currentTags = [];
+let activeTab = null;
 
 document.addEventListener("DOMContentLoaded", initializePopup);
 getTagsButton.addEventListener("click", handleGetTags);
 copyAllButton.addEventListener("click", handleCopyAll);
 
 async function initializePopup() {
-  const activeUrl = await getActiveTabUrl();
+  activeTab = await getActiveTab();
+  const activeUrl = activeTab && activeTab.url ? activeTab.url : "";
   if (activeUrl && extractVideoId(activeUrl)) {
     urlInput.value = activeUrl;
     handleGetTags();
   }
 }
 
-function getActiveTabUrl() {
+function getActiveTab() {
   return new Promise((resolve) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
         console.error("BRNV YouTube Tags:", chrome.runtime.lastError.message);
-        resolve("");
+        resolve(null);
         return;
       }
-      resolve(tabs && tabs[0] && tabs[0].url ? tabs[0].url : "");
+      resolve(tabs && tabs[0] ? tabs[0] : null);
     });
   });
 }
@@ -42,7 +44,8 @@ async function handleGetTags() {
   getTagsButton.disabled = true;
   getTagsButton.textContent = "Loading";
 
-  const result = await requestTags(videoId);
+  const pageTags = await requestPageTags(videoId);
+  const result = pageTags.length ? { tags: pageTags, reason: "" } : await requestTags(videoId);
   const tags = result.tags;
   renderTags(tags);
   setStatus(result.reason === "missing-api-key" ? "Add your YouTube Data API key in extension options first." : "");
@@ -93,6 +96,24 @@ function requestTags(videoId) {
         tags: response && Array.isArray(response.tags) ? response.tags : [],
         reason: response && typeof response.reason === "string" ? response.reason : ""
       });
+    });
+  });
+}
+
+function requestPageTags(videoId) {
+  return new Promise((resolve) => {
+    if (!activeTab || !activeTab.id || extractVideoId(activeTab.url || "") !== videoId) {
+      resolve([]);
+      return;
+    }
+
+    chrome.tabs.sendMessage(activeTab.id, { type: "GET_PAGE_TAGS", videoId }, (response) => {
+      if (chrome.runtime.lastError) {
+        resolve([]);
+        return;
+      }
+
+      resolve(response && Array.isArray(response.tags) ? response.tags : []);
     });
   });
 }
