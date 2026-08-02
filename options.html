@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BRNV YouTube Tags Settings</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main class="settings">
+      <section class="panel">
+        <h1>BRNV YouTube Tags</h1>
+        <p>Вставте YouTube Data API v3 key. Ключ зберігається локально у Chrome через chrome.storage.local.</p>
+
+        <label class="field">
+          <span>YouTube API key</span>
+          <input id="api-key" type="password" autocomplete="off" spellcheck="false">
+        </label>
+
+        <div class="actions">
+          <button id="save-key" type="button">Зберегти</button>
+          <span id="status" role="status" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Як отримати YouTube API key</h2>
+        <ol>
+          <li>Відкрити https://console.cloud.google.com/</li>
+          <li>Створити новий проєкт BRNV YouTube Tags.</li>
+          <li>Відкрити APIs &amp; Services → Library.</li>
+          <li>Знайти YouTube Data API v3.</li>
+          <li>Натиснути Enable.</li>
+          <li>Відкрити APIs &amp; Services → Credentials.</li>
+          <li>Натиснути Create Credentials → API key.</li>
+          <li>Скопіювати ключ.</li>
+          <li>У налаштуваннях ключа дозволити лише YouTube Data API v3.</li>
+          <li>Вставити ключ у налаштування розширення та зберегти.</li>
+        </ol>
+        <p>OAuth і вхід через Google не потрібні. Реальний API key не можна додавати в GitHub або вставляти в код розширення.</p>
+      </section>
+    </main>
+    <script src="options.js"></script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BRNV YouTube Tags</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup">
+      <h1>BRNV YouTube Tags</h1>
+      <label class="field">
+        <span>YouTube link</span>
+        <input id="video-url" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+      </label>
+      <div class="actions">
+        <button id="get-tags" type="button">Get tags</button>
+        <button id="copy-all" type="button" disabled>Copy all</button>
+      </div>
+      <div class="summary">
+        <span id="tag-count">0 tags</span>
+      </div>
+      <p id="status-message" class="status-message"></p>
+      <div id="tags-list" class="tags-list" aria-live="polite"></div>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
