@@ -1,6 +1,7 @@
 const BLOCK_ID = "brnv-youtube-tags-block";
 let currentVideoId = "";
 let updateTimer = 0;
+let renderSequence = 0;
 
 document.addEventListener("yt-navigate-finish", scheduleUpdate);
 window.addEventListener("popstate", scheduleUpdate);
@@ -26,6 +27,8 @@ function scheduleUpdate() {
 }
 
 async function updateForCurrentPage() {
+  const sequence = renderSequence + 1;
+  renderSequence = sequence;
   const videoId = getWatchVideoId();
 
   if (!videoId) {
@@ -42,16 +45,17 @@ async function updateForCurrentPage() {
   removeExistingBlock();
 
   const mountTarget = await waitForMountTarget();
-  if (!mountTarget || currentVideoId !== videoId) {
+  if (!mountTarget || currentVideoId !== videoId || renderSequence !== sequence) {
     return;
   }
 
   const htmlTags = await waitForHtmlTags();
   const tags = htmlTags.length ? htmlTags : await requestTags(videoId);
-  if (currentVideoId !== videoId) {
+  if (currentVideoId !== videoId || renderSequence !== sequence) {
     return;
   }
 
+  removeExistingBlock();
   mountTarget.insertAdjacentElement("afterend", createTagsBlock(tags));
 }
 
@@ -65,10 +69,9 @@ function getWatchVideoId() {
 }
 
 function removeExistingBlock() {
-  const existing = document.getElementById(BLOCK_ID);
-  if (existing) {
+  document.querySelectorAll(`#${BLOCK_ID}`).forEach((existing) => {
     existing.remove();
-  }
+  });
 }
 
 async function waitForMountTarget() {
