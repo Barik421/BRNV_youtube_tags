@@ -1,6 +1,15 @@
+try {
+  importScripts("local-api-key.js");
+} catch (error) {
+  // Optional local-only API key file is not required.
+}
+
 const API_KEY_STORAGE_KEY = "youtubeApiKey";
 const CACHE_STORAGE_KEY = "videoTagsCache";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const LOCAL_API_KEY = typeof self.BRNV_YOUTUBE_API_KEY === "string"
+  ? self.BRNV_YOUTUBE_API_KEY
+  : "";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || typeof message.type !== "string") {
@@ -86,7 +95,8 @@ async function fetchVideoTags(videoId, apiKey) {
 
 async function getStoredApiKey() {
   const data = await chrome.storage.local.get(API_KEY_STORAGE_KEY);
-  return typeof data[API_KEY_STORAGE_KEY] === "string" ? data[API_KEY_STORAGE_KEY] : "";
+  const storedApiKey = typeof data[API_KEY_STORAGE_KEY] === "string" ? data[API_KEY_STORAGE_KEY] : "";
+  return storedApiKey || LOCAL_API_KEY;
 }
 
 async function saveApiKey(apiKey) {

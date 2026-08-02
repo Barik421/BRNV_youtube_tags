@@ -1,8 +1,6 @@
 #brnv-youtube-tags-block.brnv-tags {
   box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: block;
   width: 100%;
   margin: 12px 0;
   padding: 10px 12px;
@@ -12,6 +10,7 @@
   font-family: Roboto, Arial, sans-serif;
   font-size: 14px;
   line-height: 20px;
+  transition: background-color 160ms ease, padding 160ms ease;
 }
 
 #brnv-youtube-tags-block .brnv-tags__header {
@@ -43,7 +42,7 @@
   border: 0;
   background: transparent;
   overflow: hidden;
-  color: var(--yt-spec-text-secondary, #606060);
+  color: var(--yt-spec-text-primary, #0f0f0f);
   font: inherit;
   text-align: left;
   text-overflow: ellipsis;
@@ -81,14 +80,15 @@
 }
 
 #brnv-youtube-tags-block .brnv-tags__list {
-  display: none;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-2px);
   width: 100%;
-  color: var(--yt-spec-text-secondary, #606060);
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  overflow: hidden;
   overflow-wrap: anywhere;
-}
-
-#brnv-youtube-tags-block.brnv-tags--expanded {
-  display: block;
+  transition: max-height 220ms ease, opacity 160ms ease, transform 180ms ease;
+  will-change: max-height, opacity, transform;
 }
 
 #brnv-youtube-tags-block.brnv-tags--expanded .brnv-tags__header {
@@ -100,7 +100,9 @@
 }
 
 #brnv-youtube-tags-block.brnv-tags--expanded .brnv-tags__list {
-  display: block;
+  max-height: 1200px;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 #brnv-youtube-tags-block .brnv-tags__empty {
@@ -122,5 +124,12 @@ html[dark] #brnv-youtube-tags-block.brnv-tags,
 
   #brnv-youtube-tags-block.brnv-tags {
     font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #brnv-youtube-tags-block.brnv-tags,
+  #brnv-youtube-tags-block .brnv-tags__list {
+    transition: none;
   }
 }
